@@ -41,6 +41,8 @@ UUINavWidget::UUINavWidget(const FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
 	SetIsFocusable(true);
+
+	bAutomaticallyRegisterInputOnConstruction = true;
 }
 
 void UUINavWidget::NativeConstruct()
@@ -61,12 +63,6 @@ void UUINavWidget::NativeConstruct()
 		PreSetup(!bCompletedSetup);
 
 		ConfigureUINavPC();
-
-		if (InputComponent == nullptr)
-		{
-			InitializeInputComponent();
-			UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-		}
 
 		bForcingNavigation = GetDefault<UUINavSettings>()->bForceNavigation || UINavPC->GetCurrentInputType() == EInputType::Gamepad;
 
@@ -347,12 +343,6 @@ void UUINavWidget::SetupSelector()
 void UUINavWidget::UINavSetup()
 {
 	if (UINavPC == nullptr) return;
-
-	if (InputComponent == nullptr)
-	{
-		InitializeInputComponent();
-		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-	}
 
 	if (WidgetComp == nullptr)
 	{
@@ -1916,7 +1906,7 @@ void UUINavWidget::CallOnNavigate(UUINavComponent* FromComponent, UUINavComponen
 	if (IsValid(ToComponent))
 	{
 		USoundBase* NavigatedSound = ToComponent->GetOnNavigatedSound();
-		if (NavigatedSound != nullptr && bForcingNavigation)
+		if (NavigatedSound != nullptr && bForcingNavigation && (IsValid(FromComponent) || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
 		{
 			PlaySound(NavigatedSound);
 		}
@@ -2108,6 +2098,8 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 
 	UINavPC->CancelRebind();
 
+	const bool bNavigatingToFirstComponent = CurrentComponent == nullptr;
+
 	SetHoveredComponent(Component);
 
 	if (Component == CurrentComponent && UINavPC->GetActiveSubWidget() == this)
@@ -2128,7 +2120,7 @@ void UUINavWidget::OnHoveredComponent(UUINavComponent* Component)
 			UpdateNavigationVisuals(CurrentComponent, false, true);
 
 			USoundBase* NavigatedSound = Component->GetOnNavigatedSound();
-			if (NavigatedSound != nullptr && bForcingNavigation)
+			if (NavigatedSound != nullptr && bForcingNavigation && (!bNavigatingToFirstComponent || GetDefault<UUINavSettings>()->bPlayOnNavigatedSoundOnFirstUINavComponent))
 			{
 				PlaySound(NavigatedSound);
 			}

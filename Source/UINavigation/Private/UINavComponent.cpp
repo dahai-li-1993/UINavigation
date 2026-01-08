@@ -205,7 +205,12 @@ void UUINavComponent::HandleFocusLost()
 
 void UUINavComponent::OnButtonClicked()
 {
-	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown())
+	{
+		return;
+	}
+
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
@@ -231,8 +236,12 @@ void UUINavComponent::OnButtonClicked()
 
 void UUINavComponent::OnButtonPressed()
 {
-	if (!IsValid(ParentWidget)) return;
-	if (!IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown())
+	{
+		return;
+	}
+
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
@@ -253,8 +262,12 @@ void UUINavComponent::OnButtonPressed()
 
 void UUINavComponent::OnButtonReleased()
 {
-	if (!IsValid(ParentWidget)) return;
-	if (!IsValid(ParentWidget->UINavPC) || !ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
+	if (!IsValid(ParentWidget) || !IsValid(ParentWidget->UINavPC) || ParentWidget->UINavPC->IsWaitingForInputCooldown())
+	{
+		return;
+	}
+
+	if (!ParentWidget->UINavPC->IsWidgetActive(ParentWidget) || !NavButton->HasAnyUserFocus())
 	{
 		if (ParentWidget->WidgetComp == nullptr || ParentWidget->WidgetComp->bTakeFocus)
 		{
